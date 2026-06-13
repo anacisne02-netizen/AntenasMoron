@@ -543,8 +543,9 @@ async function init(){
     }
   }
 }
-// initMap no depende de datos; se puede llamar antes del fetch.
-initMap();
+// Arranque: el mapa no debe bloquear la carga de datos.
+try { initMap(); } catch(e) { console.error('initMap falló (el mapa puede no verse, pero los datos cargan):', e); }
+init();
 </script>
 </body>
 </html>
