@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -501,12 +502,24 @@ function setLoad(msg,err){
   el.innerHTML=msg;
 }
 function clearLoad(){const el=document.getElementById('loadbox');if(el)el.remove();}
-async function fetchSitios(){
-  const res=await fetch(API_URL+'?action=getSitios',{method:'GET',redirect:'follow'});
-  if(!res.ok)throw new Error('HTTP '+res.status);
-  const j=await res.json();
-  if(!j||j.ok!==true||!Array.isArray(j.sitios))throw new Error(j&&j.error?j.error:'Respuesta inválida');
-  return j.sitios;
+function fetchSitios(){
+  // JSONP: evita el bloqueo de CORS al servir el HTML desde otro dominio
+  // (GitHub Pages). Carga la respuesta como <script> en vez de fetch().
+  return new Promise(function(resolve,reject){
+    const cbName='__antenas_cb_'+Date.now();
+    const sc=document.createElement('script');
+    let done=false;
+    const cleanup=function(){try{delete window[cbName];}catch(e){window[cbName]=undefined;}if(sc.parentNode)sc.parentNode.removeChild(sc);};
+    const timer=setTimeout(function(){if(done)return;done=true;cleanup();reject(new Error('Tiempo de espera agotado'));},15000);
+    window[cbName]=function(j){
+      if(done)return;done=true;clearTimeout(timer);cleanup();
+      if(!j||j.ok!==true||!Array.isArray(j.sitios))reject(new Error(j&&j.error?j.error:'Respuesta inválida'));
+      else resolve(j.sitios);
+    };
+    sc.onerror=function(){if(done)return;done=true;clearTimeout(timer);cleanup();reject(new Error('No se pudo conectar con el servidor'));};
+    sc.src=API_URL+'?action=getSitios&callback='+cbName;
+    document.body.appendChild(sc);
+  });
 }
 async function init(){
   const MAXTRY=3;
