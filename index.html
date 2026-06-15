@@ -16,9 +16,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mwarn{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:500;background:#fff8e1;border:1px solid #f0d890;border-radius:8px;padding:7px 14px;font-size:12px;color:#7a5c00;white-space:nowrap}
 .leaflet-popup-content{font-size:12px;line-height:1.5}
 .leaflet-popup-content b{color:#1e3a5f}
-header{background:#1e3a5f;color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
-header h1{font-size:18px;font-weight:500}
-header span{font-size:13px;opacity:.7}
+header{background:#1e3a5f;color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.hbrand{display:flex;align-items:center;gap:14px;min-width:0}
+.hlogo{height:46px;width:auto;flex-shrink:0}
+header h1{font-size:18px;font-weight:500;line-height:1.2}
+header h1 small{font-size:12px;font-weight:400;opacity:.7;display:block;margin-top:2px}
+header span{font-size:13px;opacity:.7;white-space:nowrap;flex-shrink:0}
+@media(max-width:560px){header h1{font-size:15px}.hlogo{height:38px}}
 .wrap{max-width:1200px;margin:0 auto;padding:16px 20px}
 .bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center}
 .bar input,.bar select{padding:7px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;background:#fff;color:#1a1a1a}
@@ -77,8 +81,11 @@ td.wd{white-space:normal;line-height:1.4;max-width:none}
 </head>
 <body>
 <header>
-  <h1>📡 Estructuras Soporte de Antenas — Municipio de Morón</h1>
-  <span id="hcount">354 antenas</span>
+  <div class="hbrand">
+    <img src="data:image/png;base64,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" alt="Municipio de Morón" class="hlogo">
+    <h1>Estructuras Soporte de Antenas<br><small>Municipio de Morón</small></h1>
+  </div>
+  <span id="hcount">354 sitios</span>
 </header>
 <div class="wrap">
 <div class="bar">
@@ -92,6 +99,9 @@ td.wd{white-space:normal;line-height:1.4;max-width:none}
     <option value="Movistar">Movistar (DJ)</option>
     <option value="Movistar (WICAP)">Movistar (WICAP)</option>
     <option value="Moron_2">ENACOM</option>
+  </select>
+  <select id="fl" onchange="go()">
+    <option value="">Todas las localidades</option>
   </select>
   <select id="fd" onchange="go()">
     <option value="0">Todas las distancias</option>
@@ -108,8 +118,9 @@ td.wd{white-space:normal;line-height:1.4;max-width:none}
   <span id="gprog" style="font-size:12px;color:#555"></span>
 </div>
 <div class="stats">
-  <div class="sc"><div class="sv" id="s1">354</div><div class="sl">total antenas</div></div>
+  <div class="sc"><div class="sv" id="s1">354</div><div class="sl">total sitios</div></div>
   <div class="sc"><div class="sv" id="s2">354</div><div class="sl">visibles</div></div>
+  <div class="sc"><div class="sv" id="suniq">354</div><div class="sl">únicos</div></div>
   <div class="sc"><div class="sv" id="s3">0.16 km</div><div class="sl">más cercana</div></div>
   <div class="sc"><div class="sv" id="s4">20.22 km</div><div class="sl">más lejana</div></div>
   <div class="sc"><div class="sv" id="s5">0</div><div class="sl">georreferenciadas</div></div>
@@ -193,9 +204,11 @@ function db(d){
 function filt(){
   const q=document.getElementById('q').value.toLowerCase();
   const fp=document.getElementById('fp').value;
+  const fl=document.getElementById('fl').value;
   const fd=parseFloat(document.getElementById('fd').value)||0;
   f=D.filter(r=>{
     if(fp&&r.prov!==fp)return false;
+    if(fl&&r.loc!==fl)return false;
     if(fd>0&&r.dist>fd)return false;
     if(q&&!(r.cod+' '+r.nombre+' '+r.dir+' '+r.loc+' '+r.prov).toLowerCase().includes(q))return false;
     return true;
@@ -467,7 +480,9 @@ function render(){
   tb.innerHTML=sl.map((r,i)=>'<tr onclick="rowClick(event,'+r.num+')"'+(sel.has(r.num)?' class="rs"':'')+'><td class="ck"><input type="checkbox"'+(sel.has(r.num)?' checked':'')+' onchange="tgSel('+r.num+',this.checked)"></td><td style="color:#888;font-size:12px">'+(pg*PS+i+1)+'</td><td style="font-family:monospace;font-size:11px">'+r.cod+hInd(r)+'</td><td style="font-size:12px">'+r.nombre+'</td><td class="wd" style="font-size:12px;color:#555">'+r.dir+'</td><td style="font-size:12px">'+r.loc+'</td><td>'+bg(r.prov)+'</td><td>'+gc(r)+'</td><td>'+db(r.dist)+'</td></tr>').join('');
   document.getElementById('s1').textContent=D.length;
   document.getElementById('s2').textContent=f.length;
-  document.getElementById('hcount').textContent=f.length+' / '+D.length+' antenas';
+  const uniq=new Set(f.map(r=>(r.dir||'').trim().toLowerCase().replace(/\s+/g,' '))).size;
+  document.getElementById('suniq').textContent=uniq;
+  document.getElementById('hcount').textContent=f.length+' / '+D.length+' sitios';
   const wd=f.filter(r=>r.dist>0);
   if(wd.length){
     document.getElementById('s3').textContent=Math.min(...wd.map(r=>r.dist)).toFixed(2)+' km';
@@ -487,7 +502,7 @@ function render(){
 function sb(k){sk===k?sd*=-1:(sk=k,sd=1);filt();pg=0;render();}
 function pp(){if(pg>0){pg--;render();}}
 function np(){if((pg+1)*PS<f.length){pg++;render();}}
-function rst(){document.getElementById('q').value='';document.getElementById('fp').value='';document.getElementById('fd').value='0';sk='dist';sd=1;go();}
+function rst(){document.getElementById('q').value='';document.getElementById('fp').value='';document.getElementById('fl').value='';document.getElementById('fd').value='0';sk='dist';sd=1;go();}
 // ====== CARGA INICIAL DESDE GOOGLE SHEETS ======
 function setLoad(msg,err){
   let el=document.getElementById('loadbox');
@@ -530,6 +545,10 @@ async function init(){
       D=sitios;
       MD=Math.max(...D.filter(r=>r.dist>0).map(r=>r.dist),0);
       f=[...D];
+      // Poblar el filtro de localidades con las que existan en los datos (orden alfabético)
+      const locs=[...new Set(D.map(r=>r.loc).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+      const selL=document.getElementById('fl');
+      locs.forEach(loc=>{const o=document.createElement('option');o.value=loc;o.textContent=loc;selL.appendChild(o);});
       clearLoad();
       go();
       return;
