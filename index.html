@@ -124,12 +124,9 @@ td.wd{white-space:normal;line-height:1.4;max-width:none}
     <option value="5">Hasta 5 km</option>
   </select>
   <button onclick="rst()">↺ Resetear</button>
-  <button id="bgeo" onclick="geocodeAll()" style="background:#1e3a5f;color:#fff;border-color:#1e3a5f">📍 Geocodificar</button>
-  <button id="bdl" onclick="dlHtml()" style="display:none;background:#1F6B34;color:#fff;border-color:#1F6B34">💾 Guardar cambios (HTML)</button>
   <button id="bcsv" onclick="dlCsv()" style="display:none">⬇ CSV selección</button>
   <button id="bpdf" onclick="descargarInformesSel()" class="prim" style="display:none;background:#1e3a5f;color:#fff;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:13px">📄 Informes PDF</button>
   <button id="bclr" onclick="clrSel()" style="display:none">✕ Limpiar selección</button>
-  <span id="gprog" style="font-size:12px;color:#555"></span>
 </div>
 <div class="stats">
   <div class="sc"><div class="sv" id="s1">354</div><div class="sl">total sitios</div></div>
@@ -205,7 +202,6 @@ const API_URL='https://script.google.com/macros/s/AKfycbxlWvId0gSGLGblt-GYmWDAyU
 // LOGO del Municipio (reutiliza el del header) para el informe PDF
 const LOGO='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAAOY0lEQVR42u2deZDcVbXHP6e7Z4aQhWyY4L5EkAdPywWXcuG54kqJuKAiPg0ibiioqKUIj0WUslwoCpS4BUEUNYIL+KSsiEAhBlkDhSQCCkowEsgGmZnu/vpHn5ucXH69WT1TM/o7VV2/me5z7+/e8z333HPPub/fhQkkSVW/vl/SVkl1PZwafr1M0ixJJskmoC0Vr3sfSX+W1PRPTnVJ2ySdmMoxXSkJUtL1oXNFlATxogjcgNtS8+vxfq/xNm1JCvFXSSOxHxNBtcnCwq/W4XcBu/Ywosx5raAOA2RmjQ7VDIX2dKKmy2d0IgVTm0IDptJNMF0E248yWJ+K8x8BQEf7bWZNSa8EDgWqBSNKQB04x8wuTWWmet9q00D45sKfDZwHzO9S5DWSHg9s9rIqARgMzQFGXMs7zQEjwGwz2zSRk+d/IgBNF3KtCwDbnHda0HTzcW1APCUAJZUAlACUVAJQAlACUFIJQAlASSUAJQAllQCUAJRUAlACUFIJQAlASSUAJQAllQCUAJRUApCRBsQzZag2zZTFgG7bE206KdZ0AmCra3e3ndN1YHMJwIDIzOT7PB+Q9EHgyDAaLJgdAePAGb4rrtwbOkAQmn5dDizvp0wJwCBn4NbzAd0EWxnQNvYSgAKt7kWwjenUp3IdUAJQAlBSCUAJQEklACUAJf0bA5BCBZ1+b05ye+jQJjFJz5lNVodH6PzsVsU/D06S8FNb2rXJgOHJWNRVJqn+s2n/yH/StEuBVf5o6URoX6rzx8BfaUVV242AUeAsMxv1oN6E5Rgm7YlCSY8DZrTptMzsNuebsIerU92S5gGLOgCwzcz+/G8z0UylV770+vD2ZLXZphAImqzXCjgIHfs+XcLZJZVUUkkllVRSSSWVVFJJJZVUUkl90MBiQR5fqZpZPXxXY8fL9rbvWHPeipk1Ek+KvUiq+vcVaMVkUt3bG21Wz/hinKnhEc+q16uMp5nHedJrjfPf87pj36Y8TZVXRhYFAbu1bTKjtzYIQbuWPRJ4M3BG0MJ3ArcAfwReZWY/8DKPBp5tZiskfQi4GLjdte2twPnAc13rrpQ0l9au6EXA3cCZwFuAc4F9gLd7X+4Cvu6JlEOAX/qu6qc7zziwzMxuD2/jHfK6H0srA/ZzM7vC2/kkYCmtPMZ64PNpRA4qclsZYB17Al8G3u7CfzLwHeAVwKOAj4YyewJH+d+nA9/wDg0D/0drz+obgdc6zwXAHsAqB2oIOCHw7QVcBTwNWO7m5zPAiKR9gB+5EqwHLvHkUBLgbs57E7AaOFvSG/y382mlSa8Dbg2maGBh80Fuzh3xDhxKawv5kcANwBbXrAcC7zbgfhfUb4E9JL3QzC6XtMF5HgLWSVoCzDWzD4dRNwzcl+YW4EIzWwGskHQjsDtwL7AJ+DSw3MyWedm9gMPM7KQ0Zzio57p23wt8QtLFQN3MTp5IEzRIAOYAfwD+JOl7LvBzgYXeyWo2amIi/iTgOB8tqU0pZ7sAuNvBqtF6AiZOyk3gSW4CDwE2ODgzvP65wPXh1fd/AWZnbR8CFjj49wCzfDTOl/QVV5gNwBcHnagZJABNWu///xJwNXAEsC8wzwXRDJNb8ozqDtAFwJskHewdrXaYq+Lwr9J6dOmdboZGgf81s/E2E2nRK48tq9cCwKPANa4k26b6CGgAQ2a21QWPpOez45mtWcG92wVPQUpKYJxCa/fEVgcoadpG4BHuwiY3Vv53A5hJawfD6ZmXM+6/P+gmLJVd6CMkgjIGbHK3dra3YRTYaGbnThcTNALM8c6PeAdGgMVmtk7SiKRPAL8DTgTOcy3dDZhvZqsk3Qm83sy2SZoJLPbJc9jPdLnShXq1jywDdnEQ8CNHxl2ou7mp+Sbwfa97JvA64IDMk3kU8HJJDVeEM83sQT/TZql7XqPAZYPOWw8CgNSgm4HzXKvrfr3C5waAg4GjgXcA3zOzs1xgXwO2OnDHAH9y/kvCKDkI+DjwJtfeq4CzXNiX+hVgPCzcvumLqlWS3uduaxN4h5mtdfDl2n4OcJD/f1pyl4HDgfe5Iv0NuAKoT4dzCabSgvBfWYhN2iJy0KGInR6Qy8IJyeuRf9eIoYc8nNFnKIKC8EIMRVRDX9uFIh52CFC7Ng8UgLBHRv0sMrJyqeHqscxOXk2vrl22n8famMO+9xcl5cm9ul7qydrUiwwqUWaTEufxA9SqXXhqnertJz4jqdoLfzc+P/yt2o8c+pWNeSxk94SKmf0txni6CGRxQPPeoiEan1j3FexTgMeE1e4dZnZHHltqc885tA7xSXs7o3Ae9FjQX8xsLDdvXdq1ENg7LND+Aaw1sw091DPfF30AY2a2vl0f3NQ9IozgLUj6raQtkh7w6wWOfKWNJlckzZB0uR9PeL+XW55ravpb0iJJp0laU3By3TZJ10k62gHK60j3PFvSPc7fjsb9HmdKekqYCwpHk6SXSrpI0n0Fda2XdKGk/QvalI5ofJHzbZa0yWW4NL9vOMXvyCDrrZLWIGm04OZvKGp8qOgD2RGEknRzm07uJ+muAkGNFRxteKWHFLaf/eh/LyhoZ93rGGtT11ZJh2ZtsSC8UwuOMBz3T37G5PGZ4KNA4/GHcoXcPSpx4P9Mxj+KF2iGBjQk3SRpqI0mzvNzFhve6bqXvyaznSbpcUG7xkKZHIxGEPA1knbJOrDQ62lmnS06iLORnRP5wmDvkwA/Fu4d+xDPtqyHjzxsnupJAn23846FqySd0QawTzrfqF83JjcrzeTJHdvXYyrNkC2qus08CnikL2qqoWw0WckGftFt9rgHvCpeZgOwxuMrNXY8kTIGPBM4yu+VB/Ass/mrPVZzLbDO+SshaAdwcmhTw2P8nwsBwkrox13+sfBbxXlPk/REdn6UyrJPzXnfK+mp0U1uw19B0sbMnDT87zsl7Zo8AdfoxT5iGhm/JF2bDfc9g0bGEfYR1+gRHyFfDfWkz92SZgYTtNDvG09BXZlP0JIOD9qVPg95AijxfSEbeZK0WtIL/J4zJT1f0o2ZaZKkU0MsC0lLC05mTSPmVwUj5lPBGkjS5iIAYiXHhhgLkk4vuGEOQLrZ0YE38X+5jSexMjMhkvTi8HsRAL8JHbTAuzzwpT49J/DeEExMw4XxtII27RvATCbqelfEWgcAovxemwH2MAAqHWI7Ao51F63u5zMuDUOw2yLiGVnYGOD8TCOGfcScH+6ZoqP/3eMiMsWLht2Lui1fmKVgnWfVlgRTVgFuMrMb0jokCdjMVgO/zxabS4BFXZLzcZF1mrep0U9KMtm/hidDPuo+8PEe728W2OMiAB+d1TkGrPO60sq34bZ+TdYeAx7fYyglTdZ19/8fW2Bz0yvM5gaffXsQMQKZ/Hf/7uaMd4ZHWbu2yfu4N3CkmY33AkC6yXWeFUpa/h5Jb/NUYxL+HUFovWaIHgpJjfw53QcK2jOvWwLIzJpmVncQa5IO9KyYQl1bfGJN+d88BLDRhb6TQvl39SDUVOecDm3amqVem8DxkvZo91hUJWPGQ70nBxQX0DpGthYacYzvdqCPeEanh7XH/oVNAM/yueMSn5BvBS5yAVlIXf7CzNZ1aGu1h1B7twBm4vt72HyQHredD5zogFZ7MUELga/Tepa2Emxyw/+/3swu7GEoTnQEdxbwP8Ar/fqEAHLaYXEXcHSXuJAGAECi+cB3gZ8G2TaBd7kntqkXAIbdTp/kNxsP6T/zHQNG99dHTkbovOntqmemsA5cDrzUzO7p0lbrYbT1m+Q61ttQCeulU4JJ63iDxPRtNzMjXukw8Gsz+5UPp35j45UOyfYZBRrX7BGUtFsihnnvBvY3szWu/c2Qty7KZfc6AhSyb+3y4nPM7I/Asky+bwU+mGciOyE87hPvMlobrJYBh/cRbs3Rnule1E5a5/UtLBD6ug6dhNYmrb3c0/hDMD0N96AOznMdwP1+j9iHRUXC9rKzClzLjV363fCyJ9DaCJYUY8gjwTv1vxMAVTO7zsyOMLN3+fXOHrJo6fe1oVNp2b/EG5fiTEM+mvYuEMIdXbRxi5mtMbNbgc9miRoDTvVRG8v9Iwgw8T8zAeVrgWoIpeyX8d4HrO+ihMmd/bub8TgCm/3YOHkYopYWT31uWr26AKxjvHGj7kJuk7Qr8N7gYaUNWau61F/19g2Z2cVu86thFCyhtU2ymdYKHt9fHUBpAk8E3ububN3MGr6v6CDgv8KIEXCLmW1ybe6a7PENB7eEeFIuP+so0OBnN4K/3Y0Szy/dB4951QMk/UTSgZL2l/QW4DduSqKbegOwuhvgWXuOy0ahgON8n08M7P0wT6UCyyQdJ+kl/vkUrV19ZLw/6GNyNl+AfazjojXEglI844ftEhlZsG1lFte4tiBhkWLuowXxJmXh32bgS/mIoQ6xoMvytKGkS0MsJvF9MtXlYYY5IT8xru6UeG6XNNvrGMpiQUkG90laUJB7+FkWI1KMBTXDp9ubrXJNV5tyaRfEibT20qR4SNMn50YwFdGFHKa1U3pFCi90uF/RaPxsNmk2fB2wm2tj1U3IYf5bLbjY9SCHevi+5gvFw8xsczapK5Nds8CMG609TeOhH9vLVNw7qXjn006zXmiG84/k5XwCk5k9BLzah241uIzVzIVM+zBPAY4IOweiSZkZ8gYWXFc87l41s6uAFaHOqudgPxcEUjWzlcABHk6pZq5sJSt/G/AyM7vCy0YhpxxHksGuBSay4o7CV7IcQwUYqdHa7rfYUR7uYfIjuIHz2LEFcVVMqnuE0lxrDpF0jmve8zwpnxZ5a30e+JaZXeNlmpk7uBn4f1rPFaT7rWzj0p7gq+KRYPv39AhnPSTZfy1pP1q73w706OvcEJu6kdbbtc4xs41ZYj4pxxqf1Jsuu7Xs2OWXW4OT3D3eNyxqL/onb6yAp5FwstsAAAAASUVORK5CYII=';
 // ===========================
-const SRC0='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
 let D=[];
 let MD=0;
 const PS=50;
@@ -320,74 +316,7 @@ function hav(la1,lo1,la2,lo2){
   const a=Math.sin((la2-la1)*d/2)**2+Math.cos(la1*d)*Math.cos(la2*d)*Math.sin((lo2-lo1)*d/2)**2;
   return 2*R*Math.asin(Math.sqrt(a));
 }
-function cleanDir(r){
-  let s=r.dir.split(',')[0];
-  s=s.replace(/\(.*?\)/g,' ');
-  s=s.replace(/(\be\/|\bentre\b|\besq(?:uina)?\.?(?=\s))[\s\S]*?(?=\d{1,5}\s*$|$)/i,' ');
-  s=s.replace(/\bS\/?N\b/gi,' ');
-  s=s.replace(/\s+/g,' ').trim();
-  return s;
-}
-function geoLoc(r){return r.loc.includes('Pilar')?'Presidente Derqui, Pilar':r.loc;}
-async function nomQ(q){
-  const u='https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ar&q='+encodeURIComponent(q);
-  try{
-    const res=await fetch(u,{headers:{'Accept':'application/json'}});
-    if(!res.ok)return null;
-    const j=await res.json();
-    if(!j||!j.length)return null;
-    const lat=parseFloat(j[0].lat),lon=parseFloat(j[0].lon);
-    if(isNaN(lat)||isNaN(lon))return null;
-    if(lat<BBOX.latMin||lat>BBOX.latMax||lon<BBOX.lonMin||lon>BBOX.lonMax)return null;
-    return{lat,lon};
-  }catch(e){return null;}
-}
-async function geoOne(r){
-  const base=cleanDir(r),suf=', '+geoLoc(r)+', Buenos Aires, Argentina';
-  let g=await nomQ(base+suf);
-  if(!g){
-    const m=base.match(/^(.*?)(\s\d{1,5})?$/);
-    const words=(m[1]||'').trim().split(' ');
-    if(words.length>2){
-      await slp(GEO_DELAY);
-      g=await nomQ(words.reverse().join(' ')+(m[2]||'')+suf);
-    }
-  }
-  return g;
-}
-async function geocodeAll(){
-  if(geoRunning)return;
-  geoRunning=true;
-  const bt=document.getElementById('bgeo'),pr=document.getElementById('gprog');
-  bt.disabled=true;bt.style.opacity=.5;
-  const pend=D.filter(r=>r.lat==null);
-  let ok=0,miss=0;
-  for(let i=0;i<pend.length;i++){
-    const r=pend[i];
-    pr.textContent='Geocodificando '+(i+1)+'/'+pend.length+' ('+ok+' ok'+(miss?', '+miss+' s/r':'')+')…';
-    const g=await geoOne(r);
-    if(g){
-      r.lat=g.lat;r.lon=g.lon;ok++;
-      if(r.dist===0)r.dist=Math.round(hav(MUNI[0],MUNI[1],g.lat,g.lon)*100)/100;
-    }else miss++;
-    if((i+1)%5===0||i===pend.length-1){fitPend=true;render();}
-    if(i<pend.length-1)await slp(GEO_DELAY);
-  }
-  pr.textContent='✓ '+ok+' geocodificadas'+(miss?' · '+miss+' sin resultado':'');
-  document.getElementById('bdl').style.display='inline-block';
-  bt.disabled=false;bt.style.opacity=1;
-  geoRunning=false;
-  filt();fitPend=true;render();
-}
-function dlHtml(){
-  const json=JSON.stringify(D).replace(/</g,'\\u003c');
-  const src=SRC0.replace(/const D=\[[\s\S]*?\];/,'const D='+json+';');
-  const b=new Blob([src],{type:'text/html'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(b);
-  a.download='antenas_moron_actualizado.html';
-  document.body.appendChild(a);a.click();a.remove();
-}
+// (Funciones de geocodificación y guardado-HTML retiradas: las coordenadas se cargan en el Sheets.)
 // ——— Selección de sitios ———
 const sel=new Set();
 function tgSel(num,on){on?sel.add(num):sel.delete(num);render();if(on)focusSite(num);}
@@ -417,10 +346,9 @@ function dlCsv(){
   document.body.appendChild(a);a.click();a.remove();
 }
 // ——— Vista de detalle del sitio ———
-let cur=null,dirty=false;
+let cur=null;
 const ESTC={'Conforme':'#1F6B34','Con observaciones':'#b8860b','Crítico':'#C62828','Sin relevar':'#999'};
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function markDirty(){dirty=true;document.getElementById('bdl').style.display='inline-block';}
 function hInd(r){
   const h=r.hall;
   if(!h)return'';
@@ -501,20 +429,26 @@ function descargarInformesSel(){
 }
 // Núcleo: arma la plantilla de cada sitio, la captura y la mete en el PDF.
 async function generarPDF(sitios){
-  const btns=document.querySelectorAll('.pdfbtn,.selbar button.prim');
+  const btns=document.querySelectorAll('.pdfbtn,#bpdf');
   btns.forEach(b=>{b.disabled=true;});
   const prevText=[];
-  btns.forEach((b,i)=>{prevText[i]=b.textContent;if(b.classList.contains('pdfbtn'))b.textContent='Generando…';});
+  btns.forEach((b,i)=>{prevText[i]=b.textContent;b.textContent='Generando…';});
   try{
     const {jsPDF}=window.jspdf;
     const pdf=new jsPDF('p','mm','a4');
     const W=210, H=297;
+    // Logo en base64 reprocesado (sin perfil ICC) para que html2canvas lo capture.
+    const logoB64=await logoLimpio();
     for(let i=0;i<sitios.length;i++){
-      const fotos=await obtenerFotos(sitios[i].carpeta_fotos);
-      const meds=await obtenerFotos(sitios[i].carpeta_mediciones);
-      const tpl=construirPlantilla(sitios[i],fotos,meds);
+      btns.forEach(b=>{if(sitios.length>1)b.textContent='Generando… ('+(i+1)+'/'+sitios.length+')';});
+      // Traer las fotos como base64 (vía Apps Script, sin CORS).
+      const fotos=await fotosB64(sitios[i].carpeta_fotos);
+      const meds=await fotosB64(sitios[i].carpeta_mediciones);
+      const tpl=construirPlantilla(sitios[i],fotos,meds,logoB64);
       document.body.appendChild(tpl);
-      const canvas=await html2canvas(tpl,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});
+      // Dar un instante a que las imágenes base64 se decodifiquen en el DOM.
+      await esperarImagenes(tpl);
+      const canvas=await html2canvas(tpl,{scale:2,backgroundColor:'#ffffff',logging:false});
       document.body.removeChild(tpl);
       const img=canvas.toDataURL('image/jpeg',0.85);
       const ratio=Math.min(W/canvas.width, H/canvas.height);
@@ -529,6 +463,53 @@ async function generarPDF(sitios){
   }finally{
     btns.forEach((b,i)=>{b.disabled=false;b.textContent=prevText[i];});
   }
+}
+// Convierte las fotos de una carpeta a base64 pidiéndoselas al Apps Script (sin CORS).
+async function fotosB64(folderId){
+  const fotos=await obtenerFotos(folderId);
+  const out=[];
+  for(const f of fotos){
+    const b64=await aB64(f.id);
+    if(b64)out.push({nombre:f.nombre,url:b64});
+  }
+  return out;
+}
+// Pide una imagen como base64 al Apps Script (acción getFotoB64).
+function aB64(fileId){
+  return new Promise(function(resolve){
+    if(!fileId){resolve(null);return;}
+    const cb='__b64_'+Date.now()+'_'+Math.floor(Math.random()*10000);
+    const sc=document.createElement('script');
+    const timer=setTimeout(function(){cleanup();resolve(null);},20000);
+    function cleanup(){try{delete window[cb];}catch(e){window[cb]=undefined;}if(sc.parentNode)sc.parentNode.removeChild(sc);clearTimeout(timer);}
+    window[cb]=function(j){cleanup();resolve(j&&j.ok&&j.dataUri?j.dataUri:null);};
+    sc.onerror=function(){cleanup();resolve(null);};
+    sc.src=API_URL+'?action=getFotoB64&fileId='+encodeURIComponent(fileId)+'&callback='+cb;
+    document.body.appendChild(sc);
+  });
+}
+// Reprocesa el logo (que tiene perfil ICC) dibujándolo en un canvas, para que html2canvas lo capture bien.
+function logoLimpio(){
+  return new Promise(function(resolve){
+    try{
+      const img=new Image();
+      img.onload=function(){
+        const c=document.createElement('canvas');c.width=img.naturalWidth||120;c.height=img.naturalHeight||120;
+        c.getContext('2d').drawImage(img,0,0);
+        try{resolve(c.toDataURL('image/png'));}catch(e){resolve(LOGO);}
+      };
+      img.onerror=function(){resolve(LOGO);};
+      img.src=LOGO;
+    }catch(e){resolve(LOGO);}
+  });
+}
+// Espera a que todas las <img> de un elemento estén decodificadas.
+function esperarImagenes(el){
+  const imgs=[...el.querySelectorAll('img')];
+  return Promise.all(imgs.map(function(im){
+    if(im.complete&&im.naturalWidth>0)return Promise.resolve();
+    return new Promise(function(res){im.onload=res;im.onerror=res;setTimeout(res,3000);});
+  })).then(function(){return new Promise(function(r){setTimeout(r,80);});});
 }
 // Obtiene las fotos de una carpeta para el PDF (usa caché si ya se cargaron).
 function obtenerFotos(folderId){
@@ -546,17 +527,18 @@ function obtenerFotos(folderId){
   });
 }
 // Construye la hoja del informe (oculta) que html2canvas va a "fotografiar".
-function construirPlantilla(s,fotos,meds){
+function construirPlantilla(s,fotos,meds,logoSrc){
   const div=document.createElement('div');
   div.style.cssText='position:fixed;left:-9999px;top:0;width:760px;background:#fff;padding:38px 44px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;color:#1a1a1a';
   const estado=(s.hall&&s.hall.estado)||'Sin relevar';
   const notas=(s.hall&&s.hall.notas)||'';
   const coord=s.lat!=null?(s.lat.toFixed(6)+', '+s.lon.toFixed(6)):'sin georreferenciar';
   const hoy=new Date(); const fhoy=('0'+hoy.getDate()).slice(-2)+'/'+('0'+(hoy.getMonth()+1)).slice(-2)+'/'+hoy.getFullYear();
+  const logo=logoSrc||LOGO;
   function filas(arr){return arr.map(function(f){return '<div style="aspect-ratio:4/3;border-radius:5px;overflow:hidden;border:1px solid #e0e0e0"><img src="'+f.url+'" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover"></div>';}).join('');}
   div.innerHTML=
     '<div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid #1e3a5f;padding-bottom:16px">'+
-      '<img src="'+LOGO+'" style="width:50px;height:50px;object-fit:contain">'+
+      '<img src="'+logo+'" style="width:50px;height:50px;object-fit:contain">'+
       '<div style="flex:1"><div style="font-size:18px;font-weight:600;color:#1e3a5f">Municipio de Morón</div>'+
       '<div style="font-size:12px;color:#666">Estructuras Soporte de Antenas</div></div>'+
       '<div style="text-align:right"><div style="font-size:13px;font-weight:600;color:#1e3a5f">Informe de Sitio</div>'+
@@ -580,7 +562,7 @@ function construirPlantilla(s,fotos,meds){
 }
 function fila(k,v,alt){return '<tr'+(alt?' style="background:#f7f7f4"':'')+'><td style="padding:5px 8px;color:#666;width:170px;vertical-align:top">'+k+'</td><td style="padding:5px 8px">'+v+'</td></tr>';}
 function seccionFotos(titulo,arr){
-  var grid=arr.length?('<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px">'+arr.map(function(f){return '<div style="aspect-ratio:4/3;border-radius:5px;overflow:hidden;border:1px solid #e0e0e0"><img src="'+f.url+'" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover"></div>';}).join('')+'</div>'):('<div style="font-size:12px;color:#999;margin-bottom:18px">Sin imágenes cargadas.</div>');
+  var grid=arr.length?('<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px">'+arr.map(function(f){return '<div style="aspect-ratio:4/3;border-radius:5px;overflow:hidden;border:1px solid #e0e0e0"><img src="'+f.url+'" style="width:100%;height:100%;object-fit:cover"></div>';}).join('')+'</div>'):('<div style="font-size:12px;color:#999;margin-bottom:18px">Sin imágenes cargadas.</div>');
   return '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#1e3a5f;font-weight:600;margin-bottom:8px;border-top:1px solid #e8e8e8;padding-top:14px">'+titulo+'</div>'+grid;
 }
 function go(){
