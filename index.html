@@ -6,6 +6,8 @@
 <title>Antenas Morón — Tabla Interactiva</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a;font-size:14px}
@@ -62,6 +64,17 @@ td input[type=checkbox],th input[type=checkbox]{cursor:pointer;width:14px;height
 .fitem a{color:#1e3a5f;font-weight:600;text-decoration:none;word-break:break-all}
 .fitem .fx{margin-left:auto;border:none;background:#fbeaea;color:#a33;border-radius:6px;width:24px;height:24px;cursor:pointer}
 .dnote{font-size:11px;color:#7a5c00;background:#fff8e1;border:1px solid #f0d890;border-radius:8px;padding:8px 12px;margin-top:16px}
+.pdfbtn{display:inline-flex;align-items:center;gap:7px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer}
+.pdfbtn:hover{background:#264a73}
+.pdfbtn:disabled{opacity:.6;cursor:wait}
+.galeria{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-top:4px}
+.galeria a{display:block;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid #e0e0e0;cursor:pointer}
+.galeria img{width:100%;height:100%;object-fit:cover;display:block}
+.galmsg{grid-column:1/-1;font-size:12px;color:#999;padding:10px 0}
+.selbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;background:#eaf2fb;border-radius:8px;margin-bottom:12px}
+.selbar .sct{font-size:13px;color:#1e3a5f;font-weight:500}
+.selbar button{padding:7px 13px;border-radius:8px;font-size:12px;cursor:pointer;border:1px solid #cdd9e8;background:#fff}
+.selbar button.prim{background:#1e3a5f;color:#fff;border:none;font-weight:500}
 td{padding:7px 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
 td.wd{white-space:normal;line-height:1.4;max-width:none}
 .bx{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
@@ -114,6 +127,7 @@ td.wd{white-space:normal;line-height:1.4;max-width:none}
   <button id="bgeo" onclick="geocodeAll()" style="background:#1e3a5f;color:#fff;border-color:#1e3a5f">📍 Geocodificar</button>
   <button id="bdl" onclick="dlHtml()" style="display:none;background:#1F6B34;color:#fff;border-color:#1F6B34">💾 Guardar cambios (HTML)</button>
   <button id="bcsv" onclick="dlCsv()" style="display:none">⬇ CSV selección</button>
+  <button id="bpdf" onclick="descargarInformesSel()" class="prim" style="display:none;background:#1e3a5f;color:#fff;border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-size:13px">📄 Informes PDF</button>
   <button id="bclr" onclick="clrSel()" style="display:none">✕ Limpiar selección</button>
   <span id="gprog" style="font-size:12px;color:#555"></span>
 </div>
@@ -164,6 +178,9 @@ td.wd{white-space:normal;line-height:1.4;max-width:none}
 <div id="ovl" onclick="if(event.target===this)closeSite()">
   <div class="dlg">
     <div class="dh"><h2 id="dt"></h2><button onclick="closeSite()" title="Cerrar">✕</button></div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+      <button class="pdfbtn" onclick="descargarInforme(cur.num)">📄 Descargar informe de sitio (PDF)</button>
+    </div>
     <div class="dg" id="dinfo"></div>
     <h3>Hallazgos del relevamiento</h3>
     <select id="hest" onchange="saveHall()">
@@ -174,16 +191,19 @@ td.wd{white-space:normal;line-height:1.4;max-width:none}
     </select>
     <textarea id="hnot" oninput="saveHall()" placeholder="Observaciones, estado de la estructura, documentación faltante…"></textarea>
     <div class="hmeta" id="hmeta"></div>
-    <h3>Archivos adjuntos</h3>
-    <input type="file" id="fin" multiple onchange="handleFiles(this.files)">
-    <div id="flist"></div>
-    <div class="dnote">⚠ Los hallazgos y archivos viven en la memoria de esta pestaña. Para conservarlos, usá <b>💾 Guardar cambios</b>: descarga este HTML con todo incrustado, y ese archivo pasa a ser la versión vigente.</div>
+    <h3>📷 Fotos del sitio</h3>
+    <div id="galFotos" class="galeria"><div class="galmsg">Cargando…</div></div>
+    <h3>📐 Mediciones</h3>
+    <div id="galMed" class="galeria"><div class="galmsg">Cargando…</div></div>
+    <div class="dnote">Las fotos y mediciones se cargan en Google Drive. Al tocar una se abre en grande.</div>
   </div>
 </div>
 <script>
 // ====== CONFIGURACIÓN ======
 // URL de la Web App de Apps Script (termina en /exec). Es lo único a configurar.
 const API_URL='https://script.google.com/macros/s/AKfycbxlWvId0gSGLGblt-GYmWDAyUmjMn57kAiTGf0qaaBdDhhDiEgKubFhSqK0IuUNdffYwg/exec';
+// LOGO del Municipio (reutiliza el del header) para el informe PDF
+const LOGO='data:image/png;base64,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';
 // ===========================
 const SRC0='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
 let D=[];
@@ -381,8 +401,9 @@ function selUI(){
   ca.indeterminate=!all&&f.some(r=>sel.has(r.num));
   const n=sel.size;
   document.getElementById('bcsv').style.display=n?'inline-block':'none';
+  document.getElementById('bpdf').style.display=n?'inline-block':'none';
   document.getElementById('bclr').style.display=n?'inline-block':'none';
-  if(n)document.getElementById('bcsv').textContent='⬇ CSV selección ('+n+')';
+  if(n){document.getElementById('bcsv').textContent='⬇ CSV selección ('+n+')';document.getElementById('bpdf').textContent='📄 Informes PDF ('+n+')';}
 }
 function dlCsv(){
   const rows=D.filter(r=>sel.has(r.num));
@@ -401,11 +422,10 @@ const ESTC={'Conforme':'#1F6B34','Con observaciones':'#b8860b','Crítico':'#C628
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function markDirty(){dirty=true;document.getElementById('bdl').style.display='inline-block';}
 function hInd(r){
-  const h=r.hall,nf=(r.files||[]).length;
-  if(!h&&!nf)return'';
+  const h=r.hall;
+  if(!h)return'';
   let s='';
   if(h&&(h.estado!=='Sin relevar'||h.notas))s+='<span class="hdot" style="background:'+ESTC[h.estado]+'" title="'+esc(h.estado)+'"></span>';
-  if(nf)s+='<span style="font-size:10px;color:#888"> 📎'+nf+'</span>';
   return s;
 }
 function rowClick(e,num){
@@ -421,14 +441,41 @@ function openSite(num){
     '<b>Dirección</b><span>'+esc(cur.dir)+'</span>'+
     '<b>Localidad</b><span>'+esc(cur.loc)+'</span>'+
     '<b>Coordenadas</b><span>'+(cur.lat!=null?'<a href="https://www.google.com/maps?q='+cur.lat+','+cur.lon+'" target="_blank" rel="noopener">'+cur.lat.toFixed(6)+', '+cur.lon.toFixed(6)+'</a>':'sin georreferenciar')+'</span>'+
-    '<b>Dist. a Municipalidad</b><span>'+(cur.dist>0?cur.dist.toFixed(2)+' km':'—')+'</span>';
+    '<b>Dist. a Municipalidad</b><span>'+(cur.dist>0?cur.dist.toFixed(2)+' km':'—')+'</span>'+
+    '<b>Fecha relevamiento</b><span>'+(cur.fecha_relevamiento?esc(cur.fecha_relevamiento):'—')+'</span>';
   const h=cur.hall||{estado:'Sin relevar',notas:'',fecha:null};
   document.getElementById('hest').value=h.estado;
   document.getElementById('hnot').value=h.notas;
   document.getElementById('hmeta').textContent=h.fecha?'Última edición: '+h.fecha:'';
-  document.getElementById('fin').value='';
-  renderFiles();
+  cargarGaleria('galFotos',cur.carpeta_fotos);
+  cargarGaleria('galMed',cur.carpeta_mediciones);
   document.getElementById('ovl').style.display='flex';
+}
+// Carga las imágenes de una carpeta de Drive vía JSONP y las pinta en la galería.
+const _fotoCache={};
+function cargarGaleria(elId,folderId){
+  const el=document.getElementById(elId);
+  if(!folderId){el.innerHTML='<div class="galmsg">Sin carpeta asignada.</div>';return;}
+  el.innerHTML='<div class="galmsg">Cargando…</div>';
+  if(_fotoCache[folderId]){pintarGaleria(el,_fotoCache[folderId]);return;}
+  const cb='__fotos_'+Date.now()+'_'+Math.floor(Math.random()*1000);
+  const sc=document.createElement('script');
+  const timer=setTimeout(function(){cleanup();el.innerHTML='<div class="galmsg">No se pudieron cargar las imágenes.</div>';},15000);
+  function cleanup(){try{delete window[cb];}catch(e){window[cb]=undefined;}if(sc.parentNode)sc.parentNode.removeChild(sc);clearTimeout(timer);}
+  window[cb]=function(j){cleanup();
+    if(!j||j.ok!==true){el.innerHTML='<div class="galmsg">No se pudieron cargar las imágenes.</div>';return;}
+    _fotoCache[folderId]=j.fotos||[];
+    pintarGaleria(el,_fotoCache[folderId]);
+  };
+  sc.onerror=function(){cleanup();el.innerHTML='<div class="galmsg">No se pudieron cargar las imágenes.</div>';};
+  sc.src=API_URL+'?action=getFotos&folderId='+encodeURIComponent(folderId)+'&callback='+cb;
+  document.body.appendChild(sc);
+}
+function pintarGaleria(el,fotos){
+  if(!fotos.length){el.innerHTML='<div class="galmsg">Sin imágenes cargadas.</div>';return;}
+  el.innerHTML=fotos.map(function(f){
+    return '<a href="'+f.full+'" target="_blank" rel="noopener" title="'+esc(f.nombre)+'"><img src="'+f.url+'" alt="'+esc(f.nombre)+'" loading="lazy"></a>';
+  }).join('');
 }
 function closeSite(){document.getElementById('ovl').style.display='none';cur=null;render();}
 function saveHall(){
@@ -436,34 +483,105 @@ function saveHall(){
   const est=document.getElementById('hest').value,not=document.getElementById('hnot').value;
   if(est==='Sin relevar'&&!not&&!cur.hall)return;
   cur.hall={estado:est,notas:not,fecha:new Date().toLocaleString('es-AR')};
-  document.getElementById('hmeta').textContent='Última edición: '+cur.hall.fecha;
-  markDirty();
+  document.getElementById('hmeta').textContent='Última edición: '+cur.hall.fecha+' (sin guardar en servidor)';
 }
-function handleFiles(fl){
-  if(!cur||!fl||!fl.length)return Promise.resolve();
-  if(!cur.files)cur.files=[];
-  const jobs=[...fl].map(fi=>new Promise(res=>{
-    const rd=new FileReader();
-    rd.onload=()=>{cur.files.push({name:fi.name,type:fi.type||'application/octet-stream',size:fi.size,data:rd.result});res();};
-    rd.onerror=()=>res();
-    rd.readAsDataURL(fi);
-  }));
-  return Promise.all(jobs).then(()=>{renderFiles();markDirty();document.getElementById('fin').value='';});
+// ====== INFORMES PDF (individual y múltiple) ======
+// Descarga el informe de un solo sitio.
+function descargarInforme(num){
+  const sitio=D.find(r=>r.num===num);
+  if(!sitio)return;
+  generarPDF([sitio]);
 }
-function delFile(i){
-  if(!cur||!cur.files)return;
-  cur.files.splice(i,1);
-  if(!cur.files.length)delete cur.files;
-  renderFiles();markDirty();
+// Descarga un PDF con los informes de los sitios seleccionados (uno por página).
+function descargarInformesSel(){
+  const sitios=D.filter(r=>sel.has(r.num));
+  if(!sitios.length){alert('No hay sitios seleccionados.');return;}
+  if(sitios.length>30 && !confirm('Vas a generar '+sitios.length+' informes en un PDF. Puede tardar un momento. ¿Continuar?'))return;
+  generarPDF(sitios);
 }
-function fsz(n){return n>1048576?(n/1048576).toFixed(1)+' MB':n>1024?Math.round(n/1024)+' KB':n+' B';}
-function renderFiles(){
-  const fl=cur&&cur.files||[];
-  document.getElementById('flist').innerHTML=fl.map((f,i)=>
-    '<div class="fitem">'+(f.type.startsWith('image/')?'<img src="'+f.data+'" alt="">':'<span style="font-size:20px">📄</span>')
-    +'<div><a href="'+f.data+'" download="'+esc(f.name)+'">'+esc(f.name)+'</a><div style="color:#999">'+fsz(f.size)+'</div></div>'
-    +'<button class="fx" onclick="delFile('+i+')" title="Eliminar">✕</button></div>').join('')
-    ||'<div style="font-size:12px;color:#999;margin-top:8px">Sin archivos adjuntos</div>';
+// Núcleo: arma la plantilla de cada sitio, la captura y la mete en el PDF.
+async function generarPDF(sitios){
+  const btns=document.querySelectorAll('.pdfbtn,.selbar button.prim');
+  btns.forEach(b=>{b.disabled=true;});
+  const prevText=[];
+  btns.forEach((b,i)=>{prevText[i]=b.textContent;if(b.classList.contains('pdfbtn'))b.textContent='Generando…';});
+  try{
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF('p','mm','a4');
+    const W=210, H=297;
+    for(let i=0;i<sitios.length;i++){
+      const fotos=await obtenerFotos(sitios[i].carpeta_fotos);
+      const meds=await obtenerFotos(sitios[i].carpeta_mediciones);
+      const tpl=construirPlantilla(sitios[i],fotos,meds);
+      document.body.appendChild(tpl);
+      const canvas=await html2canvas(tpl,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});
+      document.body.removeChild(tpl);
+      const img=canvas.toDataURL('image/jpeg',0.85);
+      const ratio=Math.min(W/canvas.width, H/canvas.height);
+      const w=canvas.width*ratio, h=canvas.height*ratio;
+      if(i>0)pdf.addPage();
+      pdf.addImage(img,'JPEG',(W-w)/2,0,w,h,undefined,'FAST');
+    }
+    const nombre=sitios.length===1 ? 'Informe_'+(sitios[0].cod||sitios[0].num)+'.pdf' : 'Informes_sitios_'+sitios.length+'.pdf';
+    pdf.save(nombre);
+  }catch(e){
+    alert('No se pudo generar el PDF: '+e.message);
+  }finally{
+    btns.forEach((b,i)=>{b.disabled=false;b.textContent=prevText[i];});
+  }
+}
+// Obtiene las fotos de una carpeta para el PDF (usa caché si ya se cargaron).
+function obtenerFotos(folderId){
+  return new Promise(function(resolve){
+    if(!folderId){resolve([]);return;}
+    if(_fotoCache[folderId]){resolve(_fotoCache[folderId]);return;}
+    const cb='__pdf_'+Date.now()+'_'+Math.floor(Math.random()*1000);
+    const sc=document.createElement('script');
+    const timer=setTimeout(function(){cleanup();resolve([]);},15000);
+    function cleanup(){try{delete window[cb];}catch(e){window[cb]=undefined;}if(sc.parentNode)sc.parentNode.removeChild(sc);clearTimeout(timer);}
+    window[cb]=function(j){cleanup();const f=(j&&j.ok&&j.fotos)?j.fotos:[];_fotoCache[folderId]=f;resolve(f);};
+    sc.onerror=function(){cleanup();resolve([]);};
+    sc.src=API_URL+'?action=getFotos&folderId='+encodeURIComponent(folderId)+'&callback='+cb;
+    document.body.appendChild(sc);
+  });
+}
+// Construye la hoja del informe (oculta) que html2canvas va a "fotografiar".
+function construirPlantilla(s,fotos,meds){
+  const div=document.createElement('div');
+  div.style.cssText='position:fixed;left:-9999px;top:0;width:760px;background:#fff;padding:38px 44px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;color:#1a1a1a';
+  const estado=(s.hall&&s.hall.estado)||'Sin relevar';
+  const notas=(s.hall&&s.hall.notas)||'';
+  const coord=s.lat!=null?(s.lat.toFixed(6)+', '+s.lon.toFixed(6)):'sin georreferenciar';
+  const hoy=new Date(); const fhoy=('0'+hoy.getDate()).slice(-2)+'/'+('0'+(hoy.getMonth()+1)).slice(-2)+'/'+hoy.getFullYear();
+  function filas(arr){return arr.map(function(f){return '<div style="aspect-ratio:4/3;border-radius:5px;overflow:hidden;border:1px solid #e0e0e0"><img src="'+f.url+'" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover"></div>';}).join('');}
+  div.innerHTML=
+    '<div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid #1e3a5f;padding-bottom:16px">'+
+      '<img src="'+LOGO+'" style="width:50px;height:50px;object-fit:contain">'+
+      '<div style="flex:1"><div style="font-size:18px;font-weight:600;color:#1e3a5f">Municipio de Morón</div>'+
+      '<div style="font-size:12px;color:#666">Estructuras Soporte de Antenas</div></div>'+
+      '<div style="text-align:right"><div style="font-size:13px;font-weight:600;color:#1e3a5f">Informe de Sitio</div>'+
+      '<div style="font-size:11px;color:#888">N.º '+s.num+'</div></div>'+
+    '</div>'+
+    '<h2 style="font-size:16px;color:#1e3a5f;margin:18px 0 12px">'+esc(s.cod)+' — '+esc(s.nombre)+'</h2>'+
+    '<table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:18px">'+
+      fila('Código',esc(s.cod),false)+fila('Dirección',esc(s.dir),true)+fila('Proveedor',esc(s.prov),false)+
+      fila('Localidad',esc(s.loc),true)+fila('Coordenadas',coord,false)+
+      fila('Distancia a referencia',(s.dist>0?s.dist.toFixed(2)+' km':'—'),true)+
+      fila('Fecha de relevamiento',(s.fecha_relevamiento||'—'),false)+
+      fila('Estado de relevamiento',estado,true)+
+    '</table>'+
+    '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#1e3a5f;font-weight:600;margin-bottom:5px">Observaciones</div>'+
+    '<div style="font-size:12px;color:#333;line-height:1.5;border:1px solid #e0e0e0;border-radius:6px;padding:9px 11px;min-height:34px;margin-bottom:18px">'+(notas?esc(notas):'—')+'</div>'+
+    seccionFotos('Fotos del sitio',fotos)+
+    seccionFotos('Mediciones',meds)+
+    '<div style="border-top:2px solid #1e3a5f;padding-top:10px;display:flex;justify-content:space-between;font-size:10px;color:#888;margin-top:8px">'+
+      '<span>Municipio de Morón — Estructuras Soporte de Antenas</span><span>Generado: '+fhoy+'</span></div>';
+  return div;
+}
+function fila(k,v,alt){return '<tr'+(alt?' style="background:#f7f7f4"':'')+'><td style="padding:5px 8px;color:#666;width:170px;vertical-align:top">'+k+'</td><td style="padding:5px 8px">'+v+'</td></tr>';}
+function seccionFotos(titulo,arr){
+  var grid=arr.length?('<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px">'+arr.map(function(f){return '<div style="aspect-ratio:4/3;border-radius:5px;overflow:hidden;border:1px solid #e0e0e0"><img src="'+f.url+'" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover"></div>';}).join('')+'</div>'):('<div style="font-size:12px;color:#999;margin-bottom:18px">Sin imágenes cargadas.</div>');
+  return '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#1e3a5f;font-weight:600;margin-bottom:8px;border-top:1px solid #e8e8e8;padding-top:14px">'+titulo+'</div>'+grid;
 }
 function go(){
   filt();
